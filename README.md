@@ -15,6 +15,8 @@ The same neural network controls every fighter. Agents receive only local sensor
 
 Instead, behavior emerges from repeated multi-agent interaction.
 
+![Multi-agent combat](Assets/media/02_multi_agent_combat.gif)
+
 ---
 
 # Project Highlights
