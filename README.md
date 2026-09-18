@@ -1,6 +1,13 @@
 # RL Combat Arena
 
+![Banner](Assets/media/banner.png)
+
 > Multi-agent physics-based melee combat in Unity ML-Agents with shared-policy PPO, local perception, dynamic teams, sword-and-shield mechanics, and emergent tactical behavior.
+
+![Unity](https://img.shields.io/badge/Unity-6-black?logo=unity)
+![ML-Agents](https://img.shields.io/badge/ML--Agents-PPO-blue)
+![Language](https://img.shields.io/badge/C%23-.NET-purple)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 A reinforcement learning project where autonomous fighters learn melee combat using swords and shields in a physics-based Unity arena.
 
@@ -62,7 +69,7 @@ The arena can be configured for different layouts such as:
 
 The duel is therefore only a special case of the more general multi-agent arena.
 
-![Combat Arena overview](docs/assets/readme/01_arena_overview.gif)
+![Combat Arena overview](Assets/media/01_arena_overview.gif)
 
 ---
 
@@ -74,13 +81,13 @@ The same shared policy controls every fighter in the arena.
 
 Agents receive different local observations and therefore develop different actions even though the underlying neural network is identical.
 
-![Multi-agent combat](docs/assets/readme/02_multi_agent_combat.gif)
+![Multi-agent combat](Assets/media/02_multi_agent_combat.gif)
 
 ## Sword and shield interaction
 
 Attacks and blocks are resolved through actual weapon, body and shield geometry rather than abstract attack-distance checks.
 
-![Sword and shield combat](docs/assets/readme/03_sword_shield.gif)
+![Sword and shield combat](Assets/media/03_sword_shield.gif)
 
 ---
 
@@ -130,7 +137,7 @@ This allows the same controller to operate across different team assignments and
 
 A fighter can therefore behave differently from another fighter despite using exactly the same policy because their local observations, health, orientation, nearby weapons and combat states are different.
 
-![Shared policy diagram](docs/assets/readme/04_shared_policy.png)
+![Shared policy diagram](Assets/media/04_shared_policy.png)
 
 ---
 
@@ -187,7 +194,7 @@ An attack has an animation and active collision interval, while raising or lower
 
 The policy therefore has to learn combat timing rather than simply issuing instantaneous attack or block commands.
 
-![Sensor visualization](docs/assets/readme/05_sensors.png)
+![Sensor visualization](Assets/media/05_sensors.png)
 
 ---
 
@@ -241,7 +248,7 @@ This introduces an additional temporal component to the environment.
 
 The policy must learn not only **whether** to attack or block, but also **when**.
 
-![Attack timing](docs/assets/readme/06_attack_timing.gif)
+![Attack timing](Assets/media/06_attack_timing.gif)
 
 ---
 
@@ -291,7 +298,7 @@ The behavior requires accurate coordination between movement, body rotation, att
 
 It was not explicitly rewarded or programmed.
 
-![Precision double hit](docs/assets/readme/07_double_hit.gif)
+![Precision double hit](Assets/media/07_double_hit.gif)
 
 This became one of the clearest examples of the policy exploiting the continuous physical structure of the environment rather than merely learning a discrete sequence of combat actions.
 
@@ -333,7 +340,7 @@ Some fighters intentionally moved toward arena walls or corners, allowed opponen
 
 The behavior was mechanically valid but strategically undesirable.
 
-![Shield reward farming](docs/assets/readme/08_block_farming.gif)
+![Shield reward farming](Assets/media/08_block_farming.gif)
 
 The policy had effectively discovered that surviving inside a repeated stream of blocked attacks could be more profitable than attempting to win the fight.
 
@@ -357,7 +364,7 @@ Agents learned to raise the shield during incoming attacks rather than simply ho
 
 In some policies, fighters also lowered the shield after the opponent's attack animation passed and immediately attempted a counter-attack.
 
-![Defensive timing](docs/assets/readme/09_block_counter.gif)
+![Defensive timing](Assets/media/09_block_counter.gif)
 
 ## Body-assisted sword control
 
@@ -367,7 +374,7 @@ Agents discovered that rotating and translating the entire fighter during the at
 
 This allows the policy to effectively steer the strike using whole-body motion.
 
-![Body-assisted strike](docs/assets/readme/10_body_rotation_attack.gif)
+![Body-assisted strike](Assets/media/10_body_rotation_attack.gif)
 
 ## Precision double hits
 
@@ -375,7 +382,7 @@ Agents learned to deliberately move the active sword collider out of an opponent
 
 The resulting second hit requires considerably more precise timing than a normal attack.
 
-![Double hit detail](docs/assets/readme/11_double_hit_detail.gif)
+![Double hit detail](Assets/media/11_double_hit_detail.gif)
 
 ## Delayed engagement
 
@@ -389,7 +396,7 @@ Instead of immediately risking its own health, the fighter waited while the othe
 
 If opponents weakened or killed each other, the inactive fighter could enter the remaining fight later with full health.
 
-![Delayed engagement](docs/assets/readme/12_delayed_engagement.gif)
+![Delayed engagement](Assets/media/12_delayed_engagement.gif)
 
 The strategy did not remain dominant after further training.
 
@@ -411,7 +418,7 @@ In experiments with four or more fighters, several reward configurations produce
 
 Agents sometimes began moving around the arena in coordinated circular trajectories, producing visually recognizable group rotations.
 
-![Circular group behavior](docs/assets/readme/13_circle_behavior.gif)
+![Circular group behavior](Assets/media/13_circle_behavior.gif)
 
 This behavior appeared independently in several training experiments.
 
@@ -437,7 +444,7 @@ No agent is explicitly designated as:
 
 Any role-like behavior must emerge dynamically from the current state.
 
-![Team interaction](docs/assets/readme/14_team_behavior.gif)
+![Team interaction](Assets/media/14_team_behavior.gif)
 
 ---
 
@@ -447,7 +454,7 @@ Any role-like behavior must emerge dynamically from the current state.
 
 Early agents mostly produced unstable movement, random attacks and poorly timed shield actions.
 
-![Early training](docs/assets/readme/15_early_training.gif)
+![Early training](Assets/media/15_early_training.gif)
 
 ↓
 
@@ -457,7 +464,7 @@ Agents began actively pursuing enemies, landing attacks and discovering basic sh
 
 Combat became persistent rather than accidental.
 
-![Intermediate training](docs/assets/readme/16_intermediate_training.gif)
+![Intermediate training](Assets/media/16_intermediate_training.gif)
 
 ↓
 
@@ -474,7 +481,7 @@ Later training produced more structured behavior:
 - temporary disengagement strategies,
 - and team-dependent decisions.
 
-![Later training](docs/assets/readme/17_late_training.gif)
+![Later training](Assets/media/17_late_training.gif)
 
 ---
 
@@ -554,7 +561,7 @@ For example, one run showed rapid reward growth while the agents were gradually 
 
 Behavioral evaluation was therefore treated as an essential complement to scalar training metrics.
 
-![TensorBoard training progress](docs/assets/readme/18_training_progress.png)
+![TensorBoard training progress](Assets/media/18_training_progress.png)
 
 ---
 
@@ -624,7 +631,7 @@ The most interesting result is not any single final strategy.
 
 Instead, it is the diversity of temporary and stable behaviors that appear while the policy searches for ways to optimize the same underlying combat environment.
 
-![Final combat montage](docs/assets/readme/19_final_montage.gif)
+![Final combat montage](Assets/media/19_final_montage.gif)
 
 ---
 
@@ -693,7 +700,7 @@ Useful evaluation clips include:
 - wall-based reward farming,
 - and collective circular movement.
 
-![Evaluation grid](docs/assets/readme/20_evaluation_grid.png)
+![Evaluation grid](Assets/media/20_evaluation_grid.png)
 
 ---
 
