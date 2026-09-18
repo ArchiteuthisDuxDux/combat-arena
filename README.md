@@ -1,649 +1,510 @@
 # RL Combat Arena
 
-![Banner](Assets/media/banner.png)
+> Multi-agent physics-based melee combat in Unity ML-Agents with shared-policy PPO, local perception, dynamic teams, sword-and-shield mechanics, and emergent tactical behavior.
 
-> Multi-agent physics-based melee combat in Unity ML-Agents with shared-policy team awareness, directional blocking and emergent combat strategies.
+A reinforcement learning project where autonomous fighters learn melee combat using swords and shields in a physics-based Unity arena.
 
-![Unity](https://img.shields.io/badge/Unity-6-black?logo=unity)
-![ML-Agents](https://img.shields.io/badge/ML--Agents-PPO-blue)
-![Language](https://img.shields.io/badge/C%23-.NET-purple)
-![License](https://img.shields.io/badge/License-MIT-green)
+The same neural network controls every fighter. Agents receive only local sensory information, their own combat state, and relative ally/enemy classification. No attack sequences, defensive tactics, target selection rules, team roles, or scripted combat strategies are provided.
 
-![Combat Demo](Assets/media/combat_demo.gif)
-
-A reinforcement learning project where multiple agents learn to fight with swords and shields inside a physics-based arena.
-
-The environment supports arbitrary numbers of fighters and teams while all agents can share the same neural network. Team identity is not encoded through fixed colors, tags or team-specific policies. Instead, custom perception sensors classify nearby fighters as allies or enemies dynamically from their team membership.
-
-The combat system combines continuous physical movement with discrete sword and shield actions, animation-driven attack windows, directional blocking, health, knockback and multi-team round management.
-
-No combat tactics are explicitly scripted. Blocking, counterattacking, target engagement, retreat, positional exploitation and several unintended reward-driven strategies emerged entirely during PPO training.
+Instead, behavior emerges from repeated multi-agent interaction.
 
 ---
 
 # Project Highlights
 
-* Multi-agent melee combat with arbitrary team counts
-* Single shared PPO policy
-* Dynamic ally / enemy classification
-* Custom 360° fighter perception sensor
-* High-resolution weapon perception sensor
-* Separate wall perception
-* Continuous movement and rotation
-* Discrete sword and shield control
-* Animation-driven sword hitboxes
-* Directional shield blocking
-* Health, damage and physical knockback
-* Automatic death and round management
-* Randomized spawn positions and orientations
-* Multi-team elimination rules
-* Reward design experiments
-* Emergent tactical behavior
-* Reward exploitation discovered during training
-* Unity ML-Agents + PPO
+- Single shared PPO policy for all fighters
+- Supports multiple agents and multiple teams
+- Same policy used for allies and enemies
+- Physics-based movement and collision handling
+- Sword and shield controlled through animation-driven combat states
+- Continuous movement and rotation
+- Discrete attack and shield actions
+- Three custom ray-based perception systems
+- Local ally / enemy classification without team-specific observation channels
+- No hard-coded tactical roles
+- No explicit target selection
+- No navigation mesh
+- Reward-driven melee strategy development
+- Emergent blocking, counter-attacking and precision hit behavior
+- Emergent team-dependent strategies
+- Reward-hacking behaviors discovered during training
+- Unity ML-Agents + PPO
 
 ---
 
 # Overview
 
-The goal of this project was to build a reusable reinforcement learning environment for close-range multi-agent combat rather than a scripted duel.
+The objective of this project was to explore how complex melee behavior can emerge when several agents share the same policy but interact through a relatively constrained physical combat system.
 
-The original concept began as a simple 1v1 sword-and-shield arena, but the design was gradually generalized into a system capable of spawning an arbitrary number of fighters and distributing them across multiple teams.
+Each fighter can:
 
-The duel therefore becomes only a special case:
+- move forward, backward and sideways,
+- rotate freely,
+- attack with a sword,
+- raise or lower a shield,
+- receive damage,
+- block attacks from the front,
+- collide physically with other fighters,
+- and distinguish nearby allies from enemies.
 
-```text
-2 agents + 2 teams = 1v1
-```
+There is no combat state machine deciding *what* an agent should do.
 
-while the same environment can also represent:
+The environment implements only the physical rules of combat. Decisions about when to attack, defend, retreat, rotate, pursue an opponent, cooperate with an ally, or avoid engagement are left to the policy.
 
-```text
-4 agents + 2 teams = 2v2
-6 agents + 3 teams = 2v2v2
-4 agents + 4 teams = free-for-all
-```
+The arena can be configured for different layouts such as:
 
-All fighters use the same prefab and can use the same policy. Team membership, visual appearance, health and round state are assigned dynamically by the arena manager.
+- `1 vs 1`
+- `2 vs 1 vs 1`
+- `2 vs 2`
+- `2 vs 2 vs 2`
+- free-for-all configurations
+- larger multi-team experiments
 
-The final environment combines three separate perception systems with animation-based combat and physical interaction.
+The duel is therefore only a special case of the more general multi-agent arena.
+
+![Combat Arena overview](docs/assets/readme/01_arena_overview.gif)
 
 ---
 
 # Demo
 
-## Multi-team combat with sword attacks, directional blocks and physical knockback.
+## Multi-agent combat
 
-![Final Demo](Assets/media/final_demo.gif)
+The same shared policy controls every fighter in the arena.
 
-A full evaluation video without scripted behavior can be added here:
+Agents receive different local observations and therefore develop different actions even though the underlying neural network is identical.
 
-[![Full Evaluation](Assets/media/banner.png)](https://youtu.be/your_video_link)
+![Multi-agent combat](docs/assets/readme/02_multi_agent_combat.gif)
+
+## Sword and shield interaction
+
+Attacks and blocks are resolved through actual weapon, body and shield geometry rather than abstract attack-distance checks.
+
+![Sword and shield combat](docs/assets/readme/03_sword_shield.gif)
 
 ---
 
 # Environment Design
 
-The arena consists of physics-based fighters equipped with:
+Each fighter consists of a physics-controlled root object with separate body, sword and shield components.
 
-* a body collider,
-* a sword with an animated blade hitbox,
-* a shield,
-* a Rigidbody,
-* health,
-* custom perception sensors,
-* and a shared ML-Agents policy.
+The combat system is intentionally separated into several independent parts:
 
-Each fighter can:
+- agent decision logic,
+- physical movement,
+- animation state,
+- weapon collision detection,
+- health,
+- team membership,
+- combat resolution,
+- reward assignment,
+- and arena management.
 
-* move forward / backward,
-* strafe,
-* rotate,
-* attack,
-* raise or lower the shield.
+This makes it possible to change combat rules or reward structure without rewriting the policy interface.
 
-Combat resolution is handled independently from the agent controller.
+The environment manager dynamically spawns fighters, assigns teams, tracks deaths, detects surviving teams, terminates rounds, and starts new episodes.
 
-The environment therefore separates:
-
-```text
-FighterAgent
-    ↓
-actions / observations
-
-FighterAnimationEvents
-    ↓
-animation state
-
-CombatResolver
-    ↓
-damage / block / knockback
-
-FighterHealth
-    ↓
-health / death
-
-CombatRewardSystem
-    ↓
-reinforcement signal
-
-CombatManager
-    ↓
-teams / spawn / round state
-```
-
-This separation made it possible to modify combat rules and reward design without rebuilding the agent controller.
+Team colors are generated independently from the learning system and are used only for visualization.
 
 ---
 
-# Team System
+# Shared Policy
 
-The environment does not rely on separate prefabs or hard-coded tags for individual teams.
+Every fighter uses the same Behavior and therefore the same neural network.
 
-Each fighter receives a runtime `TeamId`.
+The policy does not learn:
 
-The arena manager:
+> "I am the red fighter."
 
-* creates fighters,
-* assigns team IDs,
-* distributes agents between teams,
-* assigns team colors,
-* tracks surviving fighters,
-* detects when only one team remains,
-* ends the current round,
-* and spawns a new population.
+Instead, observations describe relationships such as:
 
-Team colors are generated automatically from HSV hue values, so the same system works with two teams or many teams.
+> "this nearby fighter is an ally"
 
-Visual team color is used only for human readability. The neural network does not use color as an observation.
+or
+
+> "this nearby fighter is an enemy."
+
+Absolute team identity is not required for combat decisions.
+
+This allows the same controller to operate across different team assignments and arena configurations.
+
+A fighter can therefore behave differently from another fighter despite using exactly the same policy because their local observations, health, orientation, nearby weapons and combat states are different.
+
+![Shared policy diagram](docs/assets/readme/04_shared_policy.png)
 
 ---
 
 # Observation Space
 
-The final policy receives approximately **85 vector observations**.
+The agent uses several independent sources of local information.
 
-The observation space is deliberately divided into independent sensor groups rather than one large semantic state vector.
+## Fighter perception
 
-## Fighter Sensor
+A circular ray-based sensor detects nearby fighters and classifies them relative to the observing agent.
 
-A custom 360° sphere-cast sensor detects nearby fighter bodies.
+Possible semantic categories include:
 
-Each ray returns:
+- no fighter,
+- ally,
+- enemy.
 
-* normalized distance,
-* object type.
+The observation does not require a separate sensor channel for every possible team.
 
-Object type:
+This allows the number of teams to change without redesigning the neural network input around fixed team identities.
 
-```text
-0 = nothing
-1 = ally
-2 = enemy
-```
+## Weapon perception
 
-This means the sensor does not depend on the absolute team number.
+A separate sensor detects nearby combat objects such as:
 
-For example, an agent from Team 7 still receives:
+- active sword,
+- inactive sword,
+- raised shield,
+- inactive shield.
 
-```text
-1 = ally
-2 = enemy
-```
+The weapon sensor ignores the fighter's own weapon geometry.
 
-rather than learning arbitrary team IDs.
+This gives the policy information about immediate combat threats independently from fighter-body detection.
 
-The sensor operates in the local orientation of the fighter, so the perception plane rotates together with the physical body.
+## Arena perception
 
----
+A third ray-based sensor detects arena boundaries.
 
-## Weapon Sensor
+This allows fighters to react to walls and corners without receiving their global position directly.
 
-A separate sensor detects combat-relevant weapon states.
+## Internal state
 
-It ignores the fighter's own weapon hierarchy and observes external sword / shield objects.
+The policy also receives information about its own current combat state, including:
 
-The weapon sensor uses a denser ray layout because short attack windows require considerably higher angular precision than general fighter detection.
+- normalized health,
+- shield raised state,
+- shield transition state,
+- sword active state,
+- sword animation state.
 
-Typical observations include:
+This is important because melee actions are not instantaneous.
 
-* active enemy sword,
-* active shield,
-* normalized distance.
+An attack has an animation and active collision interval, while raising or lowering the shield also requires time.
 
-The sensor deliberately avoids using visual input or explicit world-space positions.
+The policy therefore has to learn combat timing rather than simply issuing instantaneous attack or block commands.
 
----
-
-## Wall Sensor
-
-A third sensor detects arena boundaries.
-
-Wall perception is kept separate from fighter and weapon perception through dedicated physics layers.
-
-This allows the policy to distinguish:
-
-```text
-environment geometry
-fighters
-weapons
-```
-
-without requiring camera input.
-
----
-
-## Internal State
-
-The agent also observes its own combat state:
-
-| Observation | Type |
-| :--- | :--- |
-| Current health | normalized scalar |
-| Shield raised | binary |
-| Shield transition / busy state | binary |
-| Sword active | binary |
-| Sword busy | binary |
-
-These observations allow the policy to reason about animation timing instead of receiving actions in a completely stateless way.
+![Sensor visualization](docs/assets/readme/05_sensors.png)
 
 ---
 
 # Action Space
 
-The action space mixes continuous and discrete control.
+The policy combines continuous locomotion with discrete combat actions.
 
-## Continuous Actions
+## Continuous actions
 
-| Action | Range | Description |
-| :--- | :---: | :--- |
-| Move X | `[-1, 1]` | local lateral movement |
-| Move Z | `[-1, 1]` | local forward / backward movement |
-| Rotate Y | `[-1, 1]` | rotation around the fighter's vertical axis |
+Action | Description
+--- | ---
+Movement X | Local left / right movement
+Movement Z | Local forward / backward movement
+Rotation Y | Fighter rotation
 
-Movement is applied through Rigidbody forces rather than direct teleportation.
+Movement force is applied relative to the fighter's current orientation.
 
----
+Rotation is also directly controlled by the policy.
 
-## Discrete Actions
+## Discrete actions
 
-Two binary branches control combat actions:
+Action | Description
+--- | ---
+Attack | Start sword attack
+Shield | Raise / maintain shield
 
-| Action | Values | Description |
-| :--- | :--- | :--- |
-| Sword | `0 / 1` | attack command |
-| Shield | `0 / 1` | shield state |
+The sword attack is animation-driven rather than an instantaneous damage command.
 
-Animation transitions determine when actions are physically possible.
-
-The policy therefore cannot instantly switch between arbitrary combat states.
+The shield can be held raised but requires animation transitions between inactive and defensive states.
 
 ---
 
 # Animation-Driven Combat
 
-Sword and shield behavior are controlled through Animator state machines.
+Sword and shield mechanics are synchronized with Unity animation events.
 
-The sword attack follows a short animation cycle:
+During an attack, the sword transitions through several logical states.
 
-```text
-Idle
- ↓
-Sword Attack
- ↓
-Idle
-```
+Only the relevant portion of the motion is treated as an active strike.
 
-During selected animation frames the sword blade collider becomes active.
+Similarly, the shield has separate:
 
-The shield follows a longer state loop:
+- raising,
+- raised,
+- lowering,
+- and inactive states.
 
-```text
-Idle
- ↓
-Shield Raise
- ↓
-Shield Up
- ↓
-Shield Lower
- ↓
-Idle
-```
+Animation events communicate these phases to the learning system and combat resolver.
 
-Animation events update runtime state flags such as:
+This introduces an additional temporal component to the environment.
 
-* `SwordActive`
-* `IsSwordBusy`
-* `ShieldRaised`
-* `ShieldTransition`
-* `IsShieldBusy`
+The policy must learn not only **whether** to attack or block, but also **when**.
 
-Correct Animator transition timing turned out to be critical.
-
-Early versions allowed transitions back to `Idle` before the attack or shield-lowering clips had finished. As a result, the final Animation Events were never reached and combat-state flags remained permanently active.
-
-The issue became particularly visible during reinforcement learning because agents generated action sequences much more aggressively than manual heuristic control.
+![Attack timing](docs/assets/readme/06_attack_timing.gif)
 
 ---
 
 # Combat Resolution
 
-Damage is resolved when an active sword blade intersects another fighter.
+Damage is determined through collision between actual combat objects.
 
-The resolver checks:
+When an active enemy sword enters a fighter's collision geometry, the combat resolver evaluates:
 
-1. whether the collider belongs to an active sword,
-2. whether attacker and defender belong to different teams,
-3. whether the defender currently has the shield raised,
-4. whether the attack arrives from inside the configurable frontal blocking angle.
+1. whether the attacker belongs to an enemy team,
+2. whether the defender currently has the shield raised,
+3. whether the attacker is inside the shield's frontal protection angle,
+4. and whether the hit should therefore be blocked or accepted.
 
-A successful hit:
+A successful hit can:
 
-* applies damage,
-* applies physical knockback,
-* emits a combat event.
+- deal damage,
+- apply physical knockback,
+- trigger reward feedback.
 
-A successful block:
+A successful block can:
 
-* prevents or reduces damage,
-* applies weaker knockback,
-* emits a block event.
+- prevent damage,
+- reduce knockback,
+- generate separate reward feedback.
 
-The frontal block angle is configurable in the Inspector.
-
-This means the shield does not provide omnidirectional protection.
-
-An agent can therefore attempt to attack from the side or behind.
+Friendly-fire damage is ignored.
 
 ---
 
-# Health and Death
+# Precision Multi-Hit Attacks
 
-Each fighter has independent health.
+One unexpected behavior appeared because the environment does not artificially restrict a sword swing to exactly one collision.
 
-The default combat setup uses:
+A hit occurs whenever an active sword collider enters the opponent's hitbox.
 
-```text
-10 HP
-1 damage per successful hit
-```
+Agents discovered that during a single active attack window they can sometimes deliberately:
 
-so approximately ten direct hits are required to eliminate a fighter.
+1. enter the opponent's hitbox,
+2. leave it,
+3. rotate or reposition,
+4. and enter the hitbox again.
 
-When health reaches zero:
+This produces two legitimate collision events during the same sword motion.
 
-```text
-FighterHealth
-    ↓
-Died event
-    ↓
-CombatManager
-    ↓
-EndEpisode()
-    ↓
-fighter removed from arena
-```
+The behavior requires accurate coordination between movement, body rotation, attack timing and collider geometry.
 
-The rest of the battle continues.
+It was not explicitly rewarded or programmed.
 
-For example:
+![Precision double hit](docs/assets/readme/07_double_hit.gif)
 
-```text
-2v2
- ↓
-one fighter dies
- ↓
-2v1
-```
-
-The round ends only when fighters from a single team remain alive.
-
-This makes individual death and round termination separate events.
-
----
-
-# Round Manager
-
-`CombatManager` is responsible for the global lifecycle of the arena.
-
-It handles:
-
-* fighter spawning,
-* randomized spawn positions,
-* randomized Y-axis orientation,
-* runtime team assignment,
-* team coloring,
-* alive-agent tracking,
-* round time limit,
-* elimination detection,
-* episode termination,
-* and full round restart.
-
-Spawn points are randomized inside a configurable radius around the arena center.
-
-Random starting rotation prevents agents from relying on a fixed initial orientation.
+This became one of the clearest examples of the policy exploiting the continuous physical structure of the environment rather than merely learning a discrete sequence of combat actions.
 
 ---
 
 # Reward Design
 
-Reward design became one of the most important parts of the project.
+The reward system was deliberately kept modular so that different combat incentives could be tested independently.
 
-Several configurations were tested.
+Reward components explored during development include:
 
-Early dense reward experiments included:
+- positive reward for dealing damage,
+- negative reward for receiving damage,
+- positive reward for blocking,
+- optional penalty for attacking into a block,
+- death penalty,
+- victory reward,
+- timeout / unresolved-round penalty.
 
-| Event | Example reward |
-| :--- | ---: |
-| Successful hit | positive |
-| Receive damage | negative |
-| Successful block | positive |
-| Attack into block | small penalty / zero |
-| Death | negative |
-| Team victory | positive |
-| Time step | small negative |
+All reward coefficients can be adjusted independently.
 
-This produced useful combat behavior quickly, but also exposed several forms of reward exploitation.
+This turned out to be one of the most important parts of the project because relatively small changes produced qualitatively different strategies.
 
-The project therefore became an experiment not only in combat control, but in how small changes in reinforcement signals alter multi-agent strategy.
+A reward function that appeared reasonable numerically could still create unexpected behavioral incentives once several agents interacted simultaneously.
 
 ---
 
-# Reward Exploitation
+# Reward Hacking
 
-## Passive Avoidance
+## Shield farming near walls
 
-With a reward configuration where combat risk outweighed the terminal victory reward, agents discovered that the safest strategy was simply to avoid each other.
+One experimental reward configuration gave a relatively strong reward for successfully blocking attacks.
 
-They moved toward opposite sides of the arena and maintained maximum distance.
+Initially this produced a desirable effect: agents learned to use the shield frequently and fights became much more defensive.
 
-This was not a navigation bug.
+After further training, however, the policy discovered a more profitable strategy.
 
-From the policy's perspective:
+Some fighters intentionally moved toward arena walls or corners, allowed opponents to pressure them, and repeatedly held the shield while incoming attacks generated block rewards.
 
-```text
-fight
-→ possible negative reward
+The behavior was mechanically valid but strategically undesirable.
 
-avoid combat
-→ approximately zero reward
-```
+![Shield reward farming](docs/assets/readme/08_block_farming.gif)
 
-so avoidance became rational.
+The policy had effectively discovered that surviving inside a repeated stream of blocked attacks could be more profitable than attempting to win the fight.
 
----
+Reducing the block reward changed this equilibrium.
 
-## Shield Farming
+An earlier experiment in the opposite direction had already demonstrated the other extreme: when blocking was rewarded too weakly, shield usage almost disappeared.
 
-A later reward configuration assigned approximately equal value to:
+This illustrates a central difficulty of multi-agent reward design:
 
-* dealing damage,
-* successfully blocking an attack.
-
-Initially the result looked desirable: agents defended intelligently and frequently used the shield.
-
-After additional training, however, the policy discovered an exploit.
-
-Agents intentionally moved toward arena walls, allowed themselves to become cornered, raised the shield and waited for opponents to repeatedly attack them.
-
-Because each successful block generated positive reward, the corner became a reliable reward-farming state.
-
-This behavior was particularly deceptive because during earlier training it looked like legitimate defensive play.
-
-The exploit appeared only after the policy had enough experience to intentionally seek the advantageous position.
+> a reward large enough to teach a useful behavior can also become large enough to make that behavior the objective itself.
 
 ---
 
 # Emergent Behaviors
 
-A number of strategies appeared without being explicitly programmed.
+Several strategies appeared during training without being explicitly programmed.
 
-## Timed Blocking and Counterattacks
+## Defensive timing
 
-Agents learned to hold the shield through an opponent's attack and occasionally lower it immediately afterward to counterattack during the opponent's recovery period.
+Agents learned to raise the shield during incoming attacks rather than simply holding it permanently.
 
-The timing is imperfect, but the behavior emerged entirely from animation-state observations and reinforcement.
+In some policies, fighters also lowered the shield after the opponent's attack animation passed and immediately attempted a counter-attack.
 
----
+![Defensive timing](docs/assets/readme/09_block_counter.gif)
 
-## Multi-Hit Sword Control
+## Body-assisted sword control
 
-One sword swing can produce more than one hit if the blade:
+The sword animation itself has relatively limited degrees of freedom.
 
-1. enters the enemy hitbox,
-2. exits it during the active attack window,
-3. and re-enters before the active frames finish.
+Agents discovered that rotating and translating the entire fighter during the attack changes the trajectory of the sword.
 
-Agents learned to exploit this intentionally.
+This allows the policy to effectively steer the strike using whole-body motion.
 
-They rotate and reposition their bodies during the swing so that the sword collider crosses the opponent multiple times.
+![Body-assisted strike](docs/assets/readme/10_body_rotation_attack.gif)
 
-The behavior is highly timing-sensitive and was not explicitly programmed.
+## Precision double hits
 
-Rather than being a collision bug, it emerged from the physical geometry of the combat system.
+Agents learned to deliberately move the active sword collider out of an opponent's hitbox and back inside during a single attack window.
 
----
+The resulting second hit requires considerably more precise timing than a normal attack.
 
-## Defensive Cornering
+![Double hit detail](docs/assets/readme/11_double_hit_detail.gif)
 
-When surrounded or pushed against a wall, agents frequently keep the shield raised instead of attempting an impossible retreat.
+## Delayed engagement
 
-This was initially interpreted as sensible defensive behavior.
+An especially interesting temporary strategy appeared in a `2 vs 1 vs 1` configuration.
 
-Later policies went further and deliberately sought these positions when the reward for blocking was too large, turning a legitimate tactic into reward exploitation.
+One of the two allied fighters would frequently disengage from the fight and remain away from the main combat.
 
----
+The behavior appeared primarily when the agent had an ally.
 
-## Delayed Engagement
+Instead of immediately risking its own health, the fighter waited while the other three agents fought.
 
-In asymmetric scenarios such as:
+If opponents weakened or killed each other, the inactive fighter could enter the remaining fight later with full health.
 
-```text
-2 vs 1 vs 1
-```
+![Delayed engagement](docs/assets/readme/12_delayed_engagement.gif)
 
-one member of the two-agent team occasionally developed a strategy of staying away from the fight.
+The strategy did not remain dominant after further training.
 
-The agent would allow its teammate and the two independent opponents to fight first, avoiding personal risk and entering only after the number of surviving fighters had decreased.
+Once the ally died, the waiting fighter was often left in a `1 vs 1 vs 1` situation where the final outcome was highly variable.
 
-The behavior appeared consistently during one stage of training and occurred primarily when the agent had a living ally.
+Nevertheless, the temporary policy is interesting because the environment contained no explicit concept of:
 
-It eventually disappeared as training continued, suggesting that the strategy was a temporary local optimum rather than the final policy.
+- waiting,
+- sacrifice,
+- backup,
+- conserving health,
+- or late engagement.
 
----
+The behavior emerged only from the interaction between shared policy, team structure and terminal reward.
 
-## Circular Group Motion
+## Circular group motion
 
-With four or more agents, several reward configurations repeatedly produced a strange collective behavior.
+In experiments with four or more fighters, several reward configurations produced another recurring collective behavior.
 
-The fighters began moving around the arena in near-regular circular trajectories.
+Agents sometimes began moving around the arena in coordinated circular trajectories, producing visually recognizable group rotations.
 
-Instead of immediately engaging, groups of agents maintained the rotation for extended periods.
+![Circular group behavior](docs/assets/readme/13_circle_behavior.gif)
 
-The pattern appeared independently across multiple reward experiments.
+This behavior appeared independently in several training experiments.
 
-One possible interpretation is that the shared policy found a low-risk cyclic state in which relative observations remained approximately stable.
-
-The behavior was never explicitly rewarded or programmed.
+It was not programmed as a formation and appears to be a stable multi-agent motion pattern generated by symmetric local interactions.
 
 ---
 
-# Shared Policy Dynamics
+# Team-Dependent Behavior
 
-All fighters can use the same policy.
+One of the more interesting observations is that the policy can behave differently depending on whether allies are present even though agents have no explicit tactical role.
 
-This produces a particularly constrained competitive learning problem.
+For example, the delayed-engagement strategy appeared primarily when another allied fighter existed.
 
-Unlike air hockey, where many useful actions are not directly harmful to the opponent, melee combat is much closer to a zero-sum interaction:
+This suggests that local ally/enemy observations are sufficient for the shared policy to condition its strategy on the social structure of the nearby fight.
 
-```text
-one agent deals damage
-→ another agent receives damage
+No agent is explicitly designated as:
 
-one agent survives
-→ another agent dies
+- attacker,
+- defender,
+- support,
+- survivor,
+- or bait.
 
-one team wins
-→ every other team loses
-```
+Any role-like behavior must emerge dynamically from the current state.
 
-This made reward balancing significantly more difficult.
-
-If negative combat outcomes dominate, the shared policy can learn that avoiding combat is statistically preferable.
-
-If dense positive combat rewards dominate, the policy can instead learn to farm those intermediate events rather than maximize actual victory probability.
-
-Later experiments therefore focused increasingly on sparse terminal rewards and on balancing the reward magnitude across agents controlled by the same network.
+![Team interaction](docs/assets/readme/14_team_behavior.gif)
 
 ---
 
 # Policy Evolution
 
-## Early Policy
+## Initial policy
 
-![Early Policy](Assets/media/early.gif)
+Early agents mostly produced unstable movement, random attacks and poorly timed shield actions.
 
-Random movement, frequent missed attacks and poor shield timing.
-
-↓
-
-## Basic Combat
-
-![Basic Combat](Assets/media/basic_combat.gif)
-
-Agents approach opponents, attack reliably and begin using the shield.
+![Early training](docs/assets/readme/15_early_training.gif)
 
 ↓
 
-## Defensive Policy
+## Intermediate policy
 
-![Defensive Policy](Assets/media/defensive.gif)
+Agents began actively pursuing enemies, landing attacks and discovering basic shield usage.
 
-Blocking becomes common and agents occasionally counterattack after successfully defending.
+Combat became persistent rather than accidental.
 
-↓
-
-## Reward Exploitation
-
-![Reward Exploitation](Assets/media/reward_exploit.gif)
-
-Agents intentionally seek wall positions and farm repeated block rewards.
+![Intermediate training](docs/assets/readme/16_intermediate_training.gif)
 
 ↓
 
-## Multi-Agent Strategy
+## Tactical policy
 
-![Multi Agent](Assets/media/multi_agent.gif)
+Later training produced more structured behavior:
 
-Multi-team fights produce temporary alliances, delayed engagement, target switching and local tactical behavior.
+- attack timing,
+- active blocking,
+- counter-attacks,
+- body rotation during strikes,
+- precision multi-hit attacks,
+- wall pressure,
+- temporary disengagement strategies,
+- and team-dependent decisions.
+
+![Later training](docs/assets/readme/17_late_training.gif)
 
 ---
 
-# Training
+# Multi-Agent Reward Dynamics
 
-PPO was used for all primary experiments.
+The shared-policy setup makes reward design more complicated than single-agent control.
 
-Example training configuration:
+All fighters contribute experience to the same policy.
+
+A combat mechanic can therefore create useful behavior for one trajectory while simultaneously changing the incentives of every other fighter involved.
+
+This was especially visible in experiments involving:
+
+- symmetric damage rewards and penalties,
+- large death penalties,
+- large victory rewards,
+- block rewards,
+- and terminal-only reward structures.
+
+Reward balancing therefore focused not only on whether an individual event was desirable, but also on what repeated interaction pattern that event made profitable.
+
+The project repeatedly demonstrated that optimizing the wrong dense signal can generate extremely competent behavior for the wrong objective.
+
+---
+
+# Training Configuration
+
+Training uses PPO through Unity ML-Agents.
+
+A representative configuration uses:
 
 ```yaml
 behaviors:
@@ -673,153 +534,166 @@ behaviors:
     max_steps: 20000000
     time_horizon: 256
     summary_freq: 20000
-    keep_checkpoints: 99
-    checkpoint_interval: 50000
 ```
 
-Multiple reward configurations were tested rather than treating the first reward function as final.
+The same policy is used by every fighter.
 
-Intermediate checkpoints were also preserved because later training sometimes produced strategically different policies rather than simply stronger versions of earlier ones.
+Training environments can change the number of fighters and teams without requiring separate networks for each team.
 
 ---
 
 # Training Progress
 
-TensorBoard was used to monitor PPO training.
+TensorBoard was used to monitor cumulative reward and policy development.
 
-![Training Curve](Assets/media/training_curve.png)
+Reward curves in this environment require careful interpretation.
 
-Mean reward alone was not sufficient to evaluate policy quality.
+A rising reward does not necessarily indicate better combat.
 
-One experiment produced a rapidly increasing reward curve because agents had learned to generate large numbers of successful blocks.
+For example, one run showed rapid reward growth while the agents were gradually discovering the shield-farming strategy near arena walls.
 
-Visual inspection later revealed that the policy was deliberately entering defensive wall positions to farm the block reward.
+Behavioral evaluation was therefore treated as an essential complement to scalar training metrics.
 
-This demonstrated an important lesson from the project:
-
-> Increasing reinforcement reward does not necessarily mean that the learned policy is becoming better at the intended task.
-
-Behavioral evaluation remained essential throughout training.
+![TensorBoard training progress](docs/assets/readme/18_training_progress.png)
 
 ---
 
 # Development Notes
 
-A large part of the development effort was spent on environment design rather than neural-network architecture.
+A significant part of the project involved debugging the environment rather than changing the neural network.
 
-Important engineering problems included:
+Important issues included:
 
-* building team-independent ally / enemy perception,
-* filtering an agent's own weapon from weapon perception,
-* keeping ray observations in the fighter's local orientation,
-* synchronizing combat logic with animation frames,
-* handling trigger colliders correctly through nested object hierarchies,
-* separating local death from global round termination,
-* preventing stale observations,
-* and debugging reward-driven strategy exploits.
+- animation events,
+- attack active frames,
+- shield transition states,
+- trigger collision propagation,
+- team filtering,
+- ray sensor semantics,
+- physical knockback,
+- round termination,
+- reward balance,
+- and interaction between animation and physics.
 
-One particularly important lesson was that animation timing is part of the RL environment itself.
+One particularly important issue occurred when Animator transitions returned to the idle state before the attack or shield-lowering animation reached its final frame.
 
-If an Animator transition interrupts a clip before its final Animation Event, the agent can receive impossible observations such as:
+Because final Animation Events were never executed, internal combat flags could remain permanently active.
 
-```text
-Animator = Idle
-SwordBusy = true
-```
+Correcting the animation transitions restored reliable combat state synchronization.
 
-Even a small inconsistency like this can substantially alter reinforcement learning behavior.
+This was a useful reminder that in reinforcement learning environments, apparently strange learned behavior can originate from extremely small inconsistencies in the simulation.
+
+---
+
+# Key Design Decisions
+
+Several principles guided the final architecture:
+
+- One policy should control every fighter.
+- Team identity should remain generic rather than being hard-coded into separate sensors.
+- Agents should distinguish ally from enemy through relative perception.
+- Combat should be physically resolved rather than calculated from abstract attack ranges.
+- Sword and shield actions should require time.
+- Movement should remain available during attack animations.
+- Whole-body motion should be allowed to affect weapon trajectory.
+- The environment should not artificially restrict valid physical strategies.
+- Reward exploits should be corrected through incentive design when possible rather than by scripting tactical behavior.
+- Duel combat should remain a special case of the same general multi-agent environment.
 
 ---
 
 # Results
 
-The environment successfully produces policies capable of:
+The project demonstrates that a relatively small shared policy can produce recognizable melee tactics from local perception and a limited action space.
 
-* locating nearby enemies,
-* distinguishing allies from opponents,
-* attacking with a physically animated sword,
-* using directional shield blocks,
-* surviving multi-agent engagements,
-* counterattacking after enemy attacks,
-* exploiting precise sword trajectories for repeated hits,
-* and adapting behavior to local combat situations.
+Depending on reward configuration and training stage, learned agents have demonstrated:
 
-More importantly, the environment repeatedly generated strategies that were never explicitly programmed.
+- active enemy pursuit,
+- avoidance and disengagement,
+- shield timing,
+- defensive positioning,
+- counter-attacks,
+- whole-body strike adjustment,
+- repeated hits during one active attack interval,
+- wall pressure,
+- opportunistic waiting,
+- ally-dependent strategy changes,
+- and collective multi-agent movement patterns.
 
-Some were useful tactical behaviors.
+The most interesting result is not any single final strategy.
 
-Others were reward exploits.
+Instead, it is the diversity of temporary and stable behaviors that appear while the policy searches for ways to optimize the same underlying combat environment.
 
-Both were valuable because they revealed how strongly multi-agent reinforcement learning depends on the exact relationship between perception, physics and reward design.
+![Final combat montage](docs/assets/readme/19_final_montage.gif)
 
 ---
 
 # Technologies
 
-* Unity 6
-* Unity ML-Agents
-* C#
-* PPO (Proximal Policy Optimization)
-* Rigidbody physics
-* Animator / Animation Events
-* Custom SphereCast perception
-* TensorBoard
-* Barracuda / ONNX
+- Unity 6
+- Unity ML-Agents
+- C#
+- PPO (Proximal Policy Optimization)
+- Unity Physics
+- Animator / Animation Events
+- Custom ray-based perception
+- TensorBoard
+- ONNX inference
 
 ---
 
 # Known Issues / Limitations
 
-* The learned policy is tightly coupled to the current animation timing, movement forces and physical combat parameters.
-* Reward shaping can produce unexpected local optima such as passive avoidance or shield farming.
-* Agents use ray-based perception rather than visual observations.
-* Weapon detection is based on discrete ray / sphere-cast sampling and therefore has finite angular resolution.
-* The policy does not receive a complete global state of the arena.
-* Team strategy is emergent rather than explicitly coordinated.
-* The current shared-policy setup can create unusual reinforcement dynamics because positive outcomes for one fighter frequently correspond to negative outcomes for another fighter using the same network.
-* Policies trained with one number of fighters or teams may not immediately generalize to substantially different arena populations.
-* Multi-agent behavior remains highly sensitive to reward scaling.
-* The project was trained entirely in simulation.
+- Learned behavior is strongly dependent on the reward configuration.
+- The policy is specialized for the current sword, shield, animation and physics setup.
+- Large changes to animation timing or collider geometry can require retraining.
+- Ray-based perception is intentionally abstract and does not provide visual input.
+- Agents do not currently perform explicit long-term opponent modeling.
+- The same shared policy controls all fighters, so individual permanent tactical roles are not assigned.
+- Local perception means agents do not receive a complete global representation of the arena.
+- Some strategies can exploit reward mechanics while remaining physically valid.
+- Multi-agent reward curves alone are insufficient for evaluating tactical quality.
+- Training is performed entirely in simulation.
 
 ---
 
 # Future Work
 
-* Self-play against historical policy checkpoints
-* Randomized number of agents and teams during training
-* Observation of remaining allied fighters
-* Team-level reward experiments
-* More advanced melee animations
-* Multiple attack types
-* Stamina system
-* Shield break / stagger mechanics
-* Procedural arena geometry
-* Object pooling for large-scale training
-* Automated combat statistics
-* Evaluation against fixed historical policies
-* Elo-style policy ranking
-* Human vs AI combat mode
+Possible extensions include:
+
+- larger team battles,
+- dynamically changing team sizes,
+- additional weapon types,
+- stamina mechanics,
+- directional attacks,
+- more complex shield geometry,
+- ranged weapons,
+- capture-the-flag objectives,
+- dodgeball-style team environments,
+- recurrent policies with combat memory,
+- explicit evaluation against historical checkpoints,
+- automated behavioral metrics,
+- and procedural arena layouts.
 
 ---
 
-# Why This Project
+# Visual Evaluation
 
-The visible combat itself is deliberately simple.
+Because cumulative reward does not fully describe multi-agent behavior, direct visual evaluation is an important part of this project.
 
-The main objective was not to build a visually complex fighting game, but to create a reinforcement learning environment where:
+Useful evaluation clips include:
 
-* multiple autonomous agents interact through physics,
-* team membership is dynamic,
-* observations remain policy-independent,
-* combat timing matters,
-* local decisions affect long-term survival,
-* and unexpected strategies can emerge.
+- standard duel,
+- `2 vs 1 vs 1`,
+- `2 vs 2 vs 2`,
+- successful shield timing,
+- counter-attack,
+- precision double-hit,
+- delayed engagement,
+- wall-based reward farming,
+- and collective circular movement.
 
-The most interesting results were often behaviors that were never part of the original design.
-
-Agents learned to exploit sword trajectories, wait out attacks before counterattacking, temporarily avoid combat when they had allies, form circular movement patterns and deliberately exploit defensive reward structures.
-
-This made the project less about teaching an agent a predefined combat script and more about observing what strategies emerge when a shared neural policy is placed inside a constrained physical combat system.
+![Evaluation grid](docs/assets/readme/20_evaluation_grid.png)
 
 ---
 
