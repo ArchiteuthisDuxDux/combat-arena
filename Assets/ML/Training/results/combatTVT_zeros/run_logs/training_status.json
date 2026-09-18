@@ -1,0 +1,290 @@
+{
+    "FighterBrain": {
+        "checkpoints": [
+            {
+                "steps": 49891,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-49891.onnx",
+                "reward": -0.5771910688456368,
+                "creation_time": 1785855369.2127395,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-49891.pt"
+                ]
+            },
+            {
+                "steps": 99829,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-99829.onnx",
+                "reward": -0.847624909132719,
+                "creation_time": 1785855422.192711,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-99829.pt"
+                ]
+            },
+            {
+                "steps": 149972,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-149972.onnx",
+                "reward": -0.47041672964890796,
+                "creation_time": 1785855481.7217457,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-149972.pt"
+                ]
+            },
+            {
+                "steps": 199935,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-199935.onnx",
+                "reward": 0.780391884299944,
+                "creation_time": 1785855529.6296349,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-199935.pt"
+                ]
+            },
+            {
+                "steps": 249891,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-249891.onnx",
+                "reward": 0.5170826627002968,
+                "creation_time": 1785855578.5496645,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-249891.pt"
+                ]
+            },
+            {
+                "steps": 251993,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-251993.onnx",
+                "reward": null,
+                "creation_time": 1785855580.3581572,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-251993.pt"
+                ]
+            },
+            {
+                "steps": 299989,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-299989.onnx",
+                "reward": 0.33184797349183454,
+                "creation_time": 1785855656.0669346,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-299989.pt"
+                ]
+            },
+            {
+                "steps": 349748,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-349748.onnx",
+                "reward": 0.40956269577145576,
+                "creation_time": 1785855703.370612,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-349748.pt"
+                ]
+            },
+            {
+                "steps": 399756,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-399756.onnx",
+                "reward": -0.8674168487389883,
+                "creation_time": 1785855760.719881,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-399756.pt"
+                ]
+            },
+            {
+                "steps": 449888,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-449888.onnx",
+                "reward": 0.46279375838196796,
+                "creation_time": 1785855809.460714,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-449888.pt"
+                ]
+            },
+            {
+                "steps": 499765,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-499765.onnx",
+                "reward": 0.16668389585553384,
+                "creation_time": 1785855855.8505967,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-499765.pt"
+                ]
+            },
+            {
+                "steps": 549978,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-549978.onnx",
+                "reward": 0.6655002653598785,
+                "creation_time": 1785855909.8976533,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-549978.pt"
+                ]
+            },
+            {
+                "steps": 599774,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-599774.onnx",
+                "reward": 1.0585088972667498,
+                "creation_time": 1785855958.7334247,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-599774.pt"
+                ]
+            },
+            {
+                "steps": 649888,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-649888.onnx",
+                "reward": 1.4368336200714111,
+                "creation_time": 1785856013.8244352,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-649888.pt"
+                ]
+            },
+            {
+                "steps": 699787,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-699787.onnx",
+                "reward": 1.8994935074368038,
+                "creation_time": 1785856064.1943436,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-699787.pt"
+                ]
+            },
+            {
+                "steps": 749822,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-749822.onnx",
+                "reward": 1.3100284774013808,
+                "creation_time": 1785856117.6947272,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-749822.pt"
+                ]
+            },
+            {
+                "steps": 799867,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-799867.onnx",
+                "reward": 1.2558016067084212,
+                "creation_time": 1785856173.1954105,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-799867.pt"
+                ]
+            },
+            {
+                "steps": 849920,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-849920.onnx",
+                "reward": 1.6776885504591954,
+                "creation_time": 1785856218.2989304,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-849920.pt"
+                ]
+            },
+            {
+                "steps": 876117,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-876117.onnx",
+                "reward": null,
+                "creation_time": 1785856240.5629704,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-876117.pt"
+                ]
+            },
+            {
+                "steps": 899901,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-899901.onnx",
+                "reward": 3.9913248866796494,
+                "creation_time": 1785856289.678726,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-899901.pt"
+                ]
+            },
+            {
+                "steps": 949780,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-949780.onnx",
+                "reward": 3.7511060427535665,
+                "creation_time": 1785856336.2410505,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-949780.pt"
+                ]
+            },
+            {
+                "steps": 999807,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-999807.onnx",
+                "reward": 3.6115273950621485,
+                "creation_time": 1785856381.4197953,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-999807.pt"
+                ]
+            },
+            {
+                "steps": 1000831,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1000831.onnx",
+                "reward": null,
+                "creation_time": 1785856383.9462073,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1000831.pt"
+                ]
+            },
+            {
+                "steps": 1042219,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1042219.onnx",
+                "reward": null,
+                "creation_time": 1785857736.8626883,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1042219.pt"
+                ]
+            },
+            {
+                "steps": 1049852,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1049852.onnx",
+                "reward": 1.4603748321533203,
+                "creation_time": 1785857985.8889816,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1049852.pt"
+                ]
+            },
+            {
+                "steps": 1099942,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1099942.onnx",
+                "reward": 8.108636134558104,
+                "creation_time": 1785858038.1748343,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1099942.pt"
+                ]
+            },
+            {
+                "steps": 1149852,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1149852.onnx",
+                "reward": 12.701449528336525,
+                "creation_time": 1785858092.4824018,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1149852.pt"
+                ]
+            },
+            {
+                "steps": 1199851,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1199851.onnx",
+                "reward": 11.251216243238499,
+                "creation_time": 1785858136.1868052,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1199851.pt"
+                ]
+            },
+            {
+                "steps": 1249901,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1249901.onnx",
+                "reward": 10.826073182677781,
+                "creation_time": 1785858180.771092,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1249901.pt"
+                ]
+            },
+            {
+                "steps": 1295154,
+                "file_path": "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1295154.onnx",
+                "reward": null,
+                "creation_time": 1785858221.452671,
+                "auxillary_file_paths": [
+                    "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1295154.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 1295154,
+            "file_path": "results\\combatTVT_zeros\\FighterBrain.onnx",
+            "reward": null,
+            "creation_time": 1785858221.452671,
+            "auxillary_file_paths": [
+                "results\\combatTVT_zeros\\FighterBrain\\FighterBrain-1295154.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.2.2+cu121"
+    }
+}
